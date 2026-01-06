@@ -12,6 +12,8 @@ const PROMPT = ">>"
 func Run(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
+	printHelp(out)
+
 	for {
 		fmt.Fprint(out, PROMPT)
 		scanned := scanner.Scan()
@@ -20,10 +22,17 @@ func Run(in io.Reader, out io.Writer) {
 		}
 
 		line := scanner.Text()
-		eva := tc.New()
+		input, err := parseInput(line)
+		if err != nil {
+			if err == errEmptyInput {
+				continue
+			}
+			fmt.Fprintf(out, "Error: %v\n", err)
+			continue
+		}
 
-		fmt.Printf("Checking line: %T\n", line)
-		result, err := eva.Check(line)
+		eva := tc.New()
+		result, err := eva.Check(input)
 		if err != nil {
 			fmt.Fprintf(out, "Error: %v\n", err)
 			continue
@@ -31,4 +40,17 @@ func Run(in io.Reader, out io.Writer) {
 
 		fmt.Fprintf(out, "%+v\n", result)
 	}
+}
+
+func printHelp(out io.Writer) {
+	fmt.Fprintln(out, "Typechecker REPL")
+	fmt.Fprintln(out, "Examples:")
+	fmt.Fprintln(out, "  1")
+	fmt.Fprintln(out, "  'hello'")
+	fmt.Fprintln(out, "  \"hello\"")
+	fmt.Fprintln(out, "  true")
+	fmt.Fprintln(out, "  nil")
+	fmt.Fprintln(out, "  + 1 2")
+	fmt.Fprintln(out, "  (+ 1 2)")
+	fmt.Fprintln(out, "  [\"+\", 1, 2]")
 }
