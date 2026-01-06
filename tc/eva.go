@@ -10,6 +10,7 @@ var (
 	ErrInvalidBinaryOperation = errors.New("invalid binary operation")
 	ErrInvalidType            = func(t any, e any) error { return fmt.Errorf("invalid type: '%s', expected '%s'", t, e) }
 	ErrInvalidOperation       = func(op Operation) error { return fmt.Errorf("invalid operation: '%s'", op.String()) }
+	ErrInvalidStringLiteral   = func(s string) error { return fmt.Errorf("invalid string literal: '%s'", s) }
 )
 
 type Type string
@@ -73,6 +74,9 @@ func (e *Eva) Check(expr any) (Type, error) {
 		result = Number
 	case string:
 		result = e.detectStringType(v)
+		if result == "" {
+			return "", ErrInvalidStringLiteral(v)
+		}
 	case float64:
 		result = Number
 	case bool:

@@ -20,10 +20,17 @@ func Run(in io.Reader, out io.Writer) {
 		}
 
 		line := scanner.Text()
-		eva := tc.New()
+		input, err := parseInput(line)
+		if err != nil {
+			if err == errEmptyInput {
+				continue
+			}
+			fmt.Fprintf(out, "Error: %v\n", err)
+			continue
+		}
 
-		fmt.Printf("Checking line: %T\n", line)
-		result, err := eva.Check(line)
+		eva := tc.New()
+		result, err := eva.Check(input)
 		if err != nil {
 			fmt.Fprintf(out, "Error: %v\n", err)
 			continue
